@@ -1,0 +1,271 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+
+    <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+    <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
+
+    <title>Drop Down Search</title>
+
+
+<style>
+    .dddown
+    {
+        margin-bottom: 5px;
+    }
+
+    .dddown ul{
+         list-style-type:none;
+         padding-left:5px;
+         padding-right:5px;
+         width: auto;
+    }
+
+    .header div
+    {
+        border: 1px solid #4669a0;
+    }
+    .row div
+    {
+        border: 1px solid #4669a0;
+    }
+
+    .header, .select
+    {
+        font-weight: bold;
+    }
+
+    .highlight
+    {
+        background-color: #ffc416;
+    }
+
+</style>
+
+
+<script>
+
+    $(document).ready(function(){
+
+        var dddiv= $("<div class='dddown'><ul></ul></div>");
+        dddiv.appendTo($(".header"));
+        $(".dddown").hide();
+
+
+        $(".header").hover(function()
+        {
+            $(".row").removeClass("highlight");
+            $(".dddown ul").empty();
+            var uniqueVals=[];
+
+            var index=$(this).index();
+            var totElementsinRows=$(".rowelem").length;
+            var totElements=$(".row:eq(1)").children().length;
+            var rows=totElementsinRows/totElements;
+
+           /* console.log("tot elements:" + totElementsinRows);
+            console.log("tot elements in row:" +  totElements);
+            console.log("tot rows:" +  rows);*/
+
+            for(i=0;i<=rows-1;i++)
+            {
+                var ix=index+ i*totElements;
+                var elem =$(".row .rowelem:eq(" + ix  + ")").html();
+                uniqueVals.push("<li>" + elem + "</li>");
+            }
+
+            uniqueVals = jQuery.unique(uniqueVals.sort());            
+            $(".dddown ul").append(uniqueVals);
+            $(this).find(".dddown").toggle();
+        });
+
+
+        $(document).on("mouseenter",".dddown ul li", function()
+        {
+            $(this).toggleClass("highlight");
+            var text=$(this).html();
+            $(".row .rowelem:contains('" + text  + "')").parent().toggleClass("highlight");
+            $(".row .rowelem:contains('" + text  + "')").toggleClass("select");
+        });
+
+        $(document).on("mouseleave",".dddown ul li", function()
+        {
+            $(this).toggleClass("highlight");
+            var text=$(this).html();
+            $(".row .rowelem:contains('" + text  + "')").parent().toggleClass("highlight");
+            $(".row .rowelem:contains('" + text  + "')").toggleClass("select");
+        });
+    });
+
+
+</script>
+
+  </head>
+  <body>
+
+
+<div class="forward">Drop Down Colmuns</div>
+<br/>
+<div class="container">
+    <div class="row">
+        <div class="header col-sm-2">Header01</div>
+        <div class="header col-sm-2">Header02</div>
+        <div class="header col-sm-2">Header03</div>
+        <div class="header col-sm-2">Header04</div>
+        <div class="header col-sm-2">Header05</div>
+        <div class="header col-sm-2">Header06</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test01</div>
+        <div class="rowelem col-sm-2">Test02</div>
+        <div class="rowelem col-sm-2">Test03</div>
+        <div class="rowelem col-sm-2">Test04</div>
+        <div class="rowelem col-sm-2">Test05</div>
+        <div class="rowelem col-sm-2">Test06</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test01</div>
+        <div class="rowelem col-sm-2">Test02</div>
+        <div class="rowelem col-sm-2">Test03</div>
+        <div class="rowelem col-sm-2">Test04</div>
+        <div class="rowelem col-sm-2">Test05</div>
+        <div class="rowelem col-sm-2">Test06</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test11</div>
+        <div class="rowelem col-sm-2">Test12</div>
+        <div class="rowelem col-sm-2">Test13</div>
+        <div class="rowelem col-sm-2">Test14</div>
+        <div class="rowelem col-sm-2">Test15</div>
+        <div class="rowelem col-sm-2">Test16</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test21</div>
+        <div class="rowelem col-sm-2">Test22</div>
+        <div class="rowelem col-sm-2">Test23</div>
+        <div class="rowelem col-sm-2">Test24</div>
+        <div class="rowelem col-sm-2">Test25</div>
+        <div class="rowelem col-sm-2">Test26</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test31</div>
+        <div class="rowelem col-sm-2">Test32</div>
+        <div class="rowelem col-sm-2">Test33</div>
+        <div class="rowelem col-sm-2">Test34</div>
+        <div class="rowelem col-sm-2">Test35</div>
+        <div class="rowelem col-sm-2">Test36</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test11</div>
+        <div class="rowelem col-sm-2">Test12</div>
+        <div class="rowelem col-sm-2">Test13</div>
+        <div class="rowelem col-sm-2">Test14</div>
+        <div class="rowelem col-sm-2">Test15</div>
+        <div class="rowelem col-sm-2">Test16</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test21</div>
+        <div class="rowelem col-sm-2">Test22</div>
+        <div class="rowelem col-sm-2">Test23</div>
+        <div class="rowelem col-sm-2">Test24</div>
+        <div class="rowelem col-sm-2">Test25</div>
+        <div class="rowelem col-sm-2">Test26</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test31</div>
+        <div class="rowelem col-sm-2">Test32</div>
+        <div class="rowelem col-sm-2">Test33</div>
+        <div class="rowelem col-sm-2">Test34</div>
+        <div class="rowelem col-sm-2">Test35</div>
+        <div class="rowelem col-sm-2">Test36</div>
+    </div>    
+    <div class="row">
+        <div class="rowelem col-sm-2">Test21</div>
+        <div class="rowelem col-sm-2">Test22</div>
+        <div class="rowelem col-sm-2">Test23</div>
+        <div class="rowelem col-sm-2">Test24</div>
+        <div class="rowelem col-sm-2">Test25</div>
+        <div class="rowelem col-sm-2">Test26</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test31</div>
+        <div class="rowelem col-sm-2">Test32</div>
+        <div class="rowelem col-sm-2">Test33</div>
+        <div class="rowelem col-sm-2">Test34</div>
+        <div class="rowelem col-sm-2">Test35</div>
+        <div class="rowelem col-sm-2">Test36</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test11</div>
+        <div class="rowelem col-sm-2">Test12</div>
+        <div class="rowelem col-sm-2">Test13</div>
+        <div class="rowelem col-sm-2">Test14</div>
+        <div class="rowelem col-sm-2">Test15</div>
+        <div class="rowelem col-sm-2">Test16</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test21</div>
+        <div class="rowelem col-sm-2">Test22</div>
+        <div class="rowelem col-sm-2">Test23</div>
+        <div class="rowelem col-sm-2">Test24</div>
+        <div class="rowelem col-sm-2">Test25</div>
+        <div class="rowelem col-sm-2">Test26</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test31</div>
+        <div class="rowelem col-sm-2">Test32</div>
+        <div class="rowelem col-sm-2">Test33</div>
+        <div class="rowelem col-sm-2">Test34</div>
+        <div class="rowelem col-sm-2">Test35</div>
+        <div class="rowelem col-sm-2">Test36</div>
+    </div>        
+    <div class="row">
+        <div class="rowelem col-sm-2">Test21</div>
+        <div class="rowelem col-sm-2">Test22</div>
+        <div class="rowelem col-sm-2">Test23</div>
+        <div class="rowelem col-sm-2">Test24</div>
+        <div class="rowelem col-sm-2">Test25</div>
+        <div class="rowelem col-sm-2">Test26</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test31</div>
+        <div class="rowelem col-sm-2">Test32</div>
+        <div class="rowelem col-sm-2">Test33</div>
+        <div class="rowelem col-sm-2">Test34</div>
+        <div class="rowelem col-sm-2">Test35</div>
+        <div class="rowelem col-sm-2">Test36</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test11</div>
+        <div class="rowelem col-sm-2">Test12</div>
+        <div class="rowelem col-sm-2">Test13</div>
+        <div class="rowelem col-sm-2">Test14</div>
+        <div class="rowelem col-sm-2">Test15</div>
+        <div class="rowelem col-sm-2">Test16</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test21</div>
+        <div class="rowelem col-sm-2">Test22</div>
+        <div class="rowelem col-sm-2">Test23</div>
+        <div class="rowelem col-sm-2">Test24</div>
+        <div class="rowelem col-sm-2">Test25</div>
+        <div class="rowelem col-sm-2">Test26</div>
+    </div>
+    <div class="row">
+        <div class="rowelem col-sm-2">Test31</div>
+        <div class="rowelem col-sm-2">Test32</div>
+        <div class="rowelem col-sm-2">Test33</div>
+        <div class="rowelem col-sm-2">Test34</div>
+        <div class="rowelem col-sm-2">Test35</div>
+        <div class="rowelem col-sm-2">Test36</div>
+    </div>       
+</div>
+
+
+  </body>
+</html>
