@@ -6,33 +6,45 @@ When you have a grid with a lot of rows, this code helps you to filter dynamical
 Demo: https://codepen.io/skepee/pen/KYMVPZ
 
 
+Basic function:
+```
  $(".header").hover(function()
-        {
-            $(".row").removeClass("highlight");
-            $(".dddown ul").empty();
-            var uniqueVals=[];
-            var index=$(this).index();
-            var totElementsinRows=$(".rowelem").length;
-            var totElements=$(".row:eq(1)").children().length;
-            var rows=totElementsinRows/totElements;
-           /* console.log("tot elements:" + totElementsinRows);
-            console.log("tot elements in row:" +  totElements);
-            console.log("tot rows:" +  rows);*/
-            for(i=0;i<=rows-1;i++)
-            {
-                var ix=index+ i*totElements;
-                var elem =$(".row .rowelem:eq(" + ix  + ")").html();
-                uniqueVals.push("<li>" + elem + "</li>");
-            }
-            uniqueVals = jQuery.unique(uniqueVals.sort());            
-            $(".dddown ul").append(uniqueVals);
-            $(this).find(".dddown").toggle();
-        });
+   {
+       $(".row").removeClass("highlight");
+       $(".dddown ul").empty();
+       var uniqueVals=[];
+       
+       // get the index of selected column when you hover on the header
+       var index=$(this).index();
+       
+       // get the total elements in the grid (not considering the header elements)
+       var totElementsinRows=$(".rowelem").length;
+       
+       // get the number of columns
+       var totElements=$(".row:eq(1)").children().length;
+       
+       // calculates the number of rows.
+       var rows=totElementsinRows/totElements;
 
-
-
-
-
+       for(i=0;i<=rows-1;i++)
+       {
+           // get the position of data in the array
+           var ix=index+ i*totElements;
+           
+           // get the content value in that position
+           var elem =$(".row .rowelem:eq(" + ix  + ")").html();
+                      
+           uniqueVals.push("<li>" + elem + "</li>");
+       }
+       
+       // once all values are pushed in a temporary array, the array is sorted and then the unique values can be achieved.
+       uniqueVals = jQuery.unique(uniqueVals.sort());            
+       
+       // the elements list is appended to the dynamic droppdown.
+       $(".dddown ul").append(uniqueVals);
+       $(this).find(".dddown").toggle();
+   });
+```
 
 
 
