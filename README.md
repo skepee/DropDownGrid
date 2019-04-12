@@ -8,11 +8,14 @@ Demo: https://codepen.io/skepee/pen/ROgewe
 
 Basic function:
 ```
+//columnHover is the index of selected column.
 function distinct(columnHover)
 {
 	var valT=[];
 	var valN=[];
 	var elementsInColumn=[];
+	
+	// calculate elements in the grid.
 	totElementsinRows=$(".rowelem").length;
 	totElements=$(".header").length;
 	rows=totElementsinRows/totElements;
@@ -25,28 +28,32 @@ function distinct(columnHover)
 
 		var elemNum=parseFloat(elem);
 
+		// check if it is a number or a string
 		if (isNaN(elemNum))
 		{
 			if($.inArray(elem, valT) == -1)	
 			{			
-				valT.push(elem);
+				valT.push(elem);  // push into a string array
 			}
 		}
 		else
 		{
 			if($.inArray(elemNum, valN) == -1)	
 			{			
-				valN.push(elemNum);
+				valN.push(elemNum); // pusho into a number array
 			}
 		}
 	}
 
+	// sorting the number array
 	valN.sort(function compareNumbers(a, b) {
 		  return a - b;
 		});
 
+	// sortinh the string array
 	valT.sort();
 
+	// add the number of occurencies of the string in the selected column and put into a bootstrap badge tag.
 	$.each(valT, function(index)
 	{
 		var val=valT[index];
@@ -62,12 +69,14 @@ function distinct(columnHover)
 		}		
 	});
 
+	// add the number of occurencies of the number in the selected column and put into a bootstrap badge tag.
 	$.each(valN, function(index)
 	{
 		var badge=fbadge(elementsInColumn, valN[index]);
 		valN[index]="<li class='list-group-item'>"  + "<span>" + valN[index] + "</span>"  + badge  + "</li>";			
 	});
 
+	// return a merged array.
 	return $.merge(valN,valT);
 }
 ```
