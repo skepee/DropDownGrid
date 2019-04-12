@@ -74,4 +74,4 @@ Basic function:
 
 
 
-![design](https://github.com/skepee/DropDownGrid/blob/master/DropDownValues.jpg)
+![design](https://github.com/skepee/DropDownGrid/blob/master/DropDownTextAndNumbers.jpg)
