@@ -3,47 +3,73 @@ Jquery filtering elements in grid
 
 When you have a grid with a lot of rows, this code helps you to filter dynamically and to highlight the values in grid you are looking for. In the link example below, by hovering in the header, a list of distinct values in the columns comes out. If you select one of these values, the row where corresponding value is present is highlighted.
 
-Demo: https://codepen.io/skepee/pen/KYMVPZ
+Demo: https://codepen.io/skepee/pen/ROgewe
 
 
 Basic function:
 ```
- $(".header").hover(function()
-   {
-       $(".row").removeClass("highlight");
-       $(".dddown ul").empty();
-       var uniqueVals=[];
-       
-       // get the index of selected column when you hover on the header
-       var index=$(this).index();
-       
-       // get the total elements in the grid (not considering the header elements)
-       var totElementsinRows=$(".rowelem").length;
-       
-       // get the number of columns
-       var totElements=$(".row:eq(1)").children().length;
-       
-       // calculates the number of rows.
-       var rows=totElementsinRows/totElements;
-
-       for(i=0;i<=rows-1;i++)
-       {
-           // get the position of data in the array
-           var ix=index+ i*totElements;
-           
-           // get the content value in that position
-           var elem =$(".row .rowelem:eq(" + ix  + ")").html();
-                      
-           uniqueVals.push("<li>" + elem + "</li>");
-       }
-       
-       // once all values are pushed in a temporary array, the array is sorted and then the unique values can be achieved.
-       uniqueVals = jQuery.unique(uniqueVals.sort());            
-       
-       // the elements list is appended to the dynamic droppdown.
-       $(".dddown ul").append(uniqueVals);
-       $(this).find(".dddown").toggle();
-   });
+		function distinct(columnHover)
+		{
+			var valT=[];
+			var valN=[];
+			var elementsInColumn=[];
+			totElementsinRows=$(".rowelem").length;
+			totElements=$(".header").length;
+			rows=totElementsinRows/totElements;
+			
+			for(i=0;i<=rows-1;i++)
+			{
+				var ix=columnHover+ i*totElements;
+				var elem =$(".rowelem:eq(" + ix  + ")").text();				
+				elementsInColumn.push(elem);
+				
+				var elemNum=parseFloat(elem);
+				
+				if (isNaN(elemNum))
+				{
+					if($.inArray(elem, valT) == -1)	
+					{			
+						valT.push(elem);
+					}
+				}
+				else
+				{
+					if($.inArray(elemNum, valN) == -1)	
+					{			
+						valN.push(elemNum);
+					}
+				}
+			}
+					
+			valN.sort(function compareNumbers(a, b) {
+				  return a - b;
+				});
+				
+			valT.sort();
+						
+			$.each(valT, function(index)
+			{
+				var val=valT[index];
+				var badge=fbadge(elementsInColumn, val);
+				
+				if (val.trim()==="")
+				{
+					valT[index]="<li class='list-group-item'><i><span>null</span>" +  badge  + "</i></li>";
+				}
+				else
+				{
+					valT[index]="<li class='list-group-item'><span>" + valT[index] + "</span>" + badge +"</li>";
+				}		
+			});
+			
+			$.each(valN, function(index)
+			{
+				var badge=fbadge(elementsInColumn, valN[index]);
+				valN[index]="<li class='list-group-item'>"  + "<span>" + valN[index] + "</span>"  + badge  + "</li>";			
+			});
+			
+			return $.merge(valN,valT);
+		}
 ```
 
 
