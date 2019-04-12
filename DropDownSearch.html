@@ -3,269 +3,531 @@
   <head>
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-
-    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
-
     <script src="https://code.jquery.com/jquery-3.2.1.slim.min.js" integrity="sha384-KJ3o2DKtIkvYIK3UENzmM7KCkRr/rE9/Qpg6aAZGJwFDMVNA/GpGFF93hXpG5KkN" crossorigin="anonymous"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
     <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/js/bootstrap.min.js" integrity="sha384-JZR6Spejh4U02d8jOt6vLEHfe/JQGiRRSQQxSfFWpi1MquVdAyjUar5+76PVCmYl" crossorigin="anonymous"></script>
-
+    <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.0.0/css/bootstrap.min.css" integrity="sha384-Gn5384xqQ1aoWXA+058RXPxPg6fy4IWvTNh0E263XmFcJlSAwiGgFAW/dAiS6JXm" crossorigin="anonymous">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.12.9/umd/popper.min.js" integrity="sha384-ApNbgh9B+Y1QKtv3Rn7W3mgPxhU9K/ScQsAP7hUibX39j7fakFPskvXusvfa0b4Q" crossorigin="anonymous"></script>
+	<link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.6.3/css/all.css" integrity="sha384-UHRtZLI+pbxtHCWp1t77Bi1L4ZtiqrqD80Kn4Z8NTSRyMA2Fd33n5dQ8lWUE00s/" crossorigin="anonymous">	
     <title>Drop Down Search</title>
+	
+	<style>
+		.badge
+		{
+			font-size:12px;
+			color: #ffffff;
+			border:2px solid #4e71aa;
+			background-color:#2863a3;
+		}
+	
+		.dddown
+		{
+			margin-bottom: 5px;			
+			margin-top: 5px;
+			width: 75%;
+			z-index:100;
+		}
 
+		.dddown ul
+		{
+			 list-style-type:none;
+			 padding-left:5px;
+			 padding-right:5px;
+			 width: auto;
+			 height:0px;
+		}
+		
+		.header, .select
+		{
+			font-weight: bold;
+		}
 
-<style>
-    .dddown
-    {
-        margin-bottom: 5px;
-    }
+		.highlight
+		{
+			background-color: #c5dff0;
+		}
+		
+		.valGt, 
+		.valLt
+		{
+			padding-left:10px;
+			padding-right:10px;
+		}
+		
+		.valEq
+		{
+			margin-left:10px;
+			padding-left:20px;
+			padding-right:10px;
+		}
+				
+		.freezehighlight
+		{
+			background-color: #76b9e2;	
+		}
+		
+		.valEq:hover, 
+		.valGt:hover, 
+		.valLt:hover
+		{
+			border:2px solid #4e71aa;
+			border-radius: 25px;
+			padding-left:10px;
+			padding-right:10px;
+			background-color:#2863a3;
+			color:#ffffff;
+		}	
+	</style>
+	
+	<script>
+		$(document).ready(function(){
+		
+			var totElementsinRows;
+			var totElements;
+			var rows;
 
-    .dddown ul{
-         list-style-type:none;
-         padding-left:5px;
-         padding-right:5px;
-         width: auto;
-    }
+			var dddiv= $("<div class='dddown'><ul class='list-group'></ul></div>");
+			var valEq= $("<i class='valEq fas fa-equals' title='equal'></i>");
+			var valGt= $("<i class='valGt fas fa-greater-than' title='greater than'></i>");
+			var valLt= $("<i class='valLt fas fa-less-than' title='less than'></i>");
+			
+			dddiv.appendTo($(".header"));
+			$(".dddown").hide();
 
-    .header div
-    {
-        border: 1px solid #4669a0;
-    }
-    .row div
-    {
-        border: 1px solid #4669a0;
-    }
+			$(".header").hover(function()
+			{			
+				$(".dddown ul").empty();
 
-    .header, .select
-    {
-        font-weight: bold;
-    }
+				var columnHover=$(this).index();			
+				var uniqueVals=distinct(columnHover);	
+				
+				$(".dddown ul").append(uniqueVals);
+				$(this).find(".dddown").toggle();
+				
+				$("tr").removeClass("highlight");
+				$(".rowelem").removeClass("select");
+				
+			});
+			
 
-    .highlight
-    {
-        background-color: #ffc416;
-    }
+			$("#reset").click(function(){
+				$("tr").removeClass("freezehighlight").removeClass("highlight");
+				$(".rowelem").removeClass("select");
+			});
+						
+			$(document).on("mouseenter",".dddown ul li", function()
+			{		
+				$(this).toggleClass("highlight");
+				
+				$(this).children(".valEq").remove();
+				$(this).children(".valGt").remove();
+				$(this).children(".valLt").remove();
+				$(this).append(valEq);
 
-</style>
+				var text=$(this).children("span:first-child").text();
 
+				if (!isNaN(parseFloat(text)))
+				{			
+					$(this).append(valGt).append(valLt);
+				}			
+			
+				$(".rowelem").each(function(index, value)
+				{
+					if($(this).text()===text)
+					{
+						$(this).parent().toggleClass("highlight");
+						$(this).toggleClass("select");
+					}
+				});
+			});
 
-<script>
+			$(document).on("mouseleave",".dddown ul li", function() 
+			{ 
+				$(this).removeClass("highlight"); 
+				$("tr").removeClass("highlight");
+				$(".rowelem").removeClass("select");
+			}); 
+					
+			$(document).on("click", ".valEq", function()
+			{
+				$(this).parent().toggleClass("freezehighlight");
+				var text=$(this).parent().children("span:first-child").text();
+				if (text==='')
+				{
+					text='null'
+				}
+				
+				equalRow(text);					
+			});
+			
+			$(document).on("click", ".valGt", function()
+			{
+				$(this).parent().removeClass("freezehighlight");
+				$(this).parent().removeClass("select");
+				var text=$(this).parent().text();	
+				var columnHover=$($(this).parent().parent().parent().parent()).index();
+				greaterThanRow(text,columnHover);					
+			});
 
-    $(document).ready(function(){
+			$(document).on("click", ".valLt", function()
+			{
+				$(this).parent().removeClass("freezehighlight");
+				$(this).parent().removeClass("select");
+				var text=$(this).parent().text();	
+				var columnHover=$($(this).parent().parent().parent().parent()).index();
+				lessThanRow(text,columnHover);					
+			});			
+		});
 
-        var dddiv= $("<div class='dddown'><ul></ul></div>");
-        dddiv.appendTo($(".header"));
-        $(".dddown").hide();
+	
+		function distinct(columnHover)
+		{
+			var valT=[];
+			var valN=[];
+			var elementsInColumn=[];
+			totElementsinRows=$(".rowelem").length;
+			totElements=$(".header").length;
+			rows=totElementsinRows/totElements;
+			
+			for(i=0;i<=rows-1;i++)
+			{
+				var ix=columnHover+ i*totElements;
+				var elem =$(".rowelem:eq(" + ix  + ")").text();				
+				elementsInColumn.push(elem);
+				
+				var elemNum=parseFloat(elem);
+				
+				if (isNaN(elemNum))
+				{
+					if($.inArray(elem, valT) == -1)	
+					{			
+						valT.push(elem);
+					}
+				}
+				else
+				{
+					if($.inArray(elemNum, valN) == -1)	
+					{			
+						valN.push(elemNum);
+					}
+				}
+			}
+					
+			valN.sort(function compareNumbers(a, b) {
+				  return a - b;
+				});
+				
+			valT.sort();
+						
+			$.each(valT, function(index)
+			{
+				var val=valT[index];
+				var badge=fbadge(elementsInColumn, val);
+				
+				if (val.trim()==="")
+				{
+					valT[index]="<li class='list-group-item'><i><span>null</span>" +  badge  + "</i></li>";
+				}
+				else
+				{
+					valT[index]="<li class='list-group-item'><span>" + valT[index] + "</span>" + badge +"</li>";
+				}		
+			});
+			
+			$.each(valN, function(index)
+			{
+				var badge=fbadge(elementsInColumn, valN[index]);
+				valN[index]="<li class='list-group-item'>"  + "<span>" + valN[index] + "</span>"  + badge  + "</li>";			
+			});
+			
+			return $.merge(valN,valT);
+		}
+		
+		function fbadge(arr, val)
+		{		
+			var n= $.grep(arr, function (elem) {
+			
+			var v=parseFloat(val);
+			if (!isNaN(v))
+			{
+				return parseFloat(elem) === v;
+			}
+			else
+			{
+				return elem === val;
+			}
+			}).length; 
+			
+			var badge="&nbsp;&nbsp;<span class='badge badge-light'>" + n + "</span>";
+		
+			return badge;		
+		}		
 
-
-        $(".header").hover(function()
-        {
-            $(".row").removeClass("highlight");
-            $(".dddown ul").empty();
-            var uniqueVals=[];
-
-            var index=$(this).index();
-            var totElementsinRows=$(".rowelem").length;
-            var totElements=$(".row:eq(1)").children().length;
-            var rows=totElementsinRows/totElements;
-
-           /* console.log("tot elements:" + totElementsinRows);
-            console.log("tot elements in row:" +  totElements);
-            console.log("tot rows:" +  rows);*/
-
-            for(i=0;i<=rows-1;i++)
-            {
-                var ix=index+ i*totElements;
-                var elem =$(".row .rowelem:eq(" + ix  + ")").html();
-                uniqueVals.push("<li>" + elem + "</li>");
-            }
-
-            uniqueVals = jQuery.unique(uniqueVals.sort());            
-            $(".dddown ul").append(uniqueVals);
-            $(this).find(".dddown").toggle();
-        });
-
-
-        $(document).on("mouseenter",".dddown ul li", function()
-        {
-            $(this).toggleClass("highlight");
-            var text=$(this).html();
-            $(".row .rowelem:contains('" + text  + "')").parent().toggleClass("highlight");
-            $(".row .rowelem:contains('" + text  + "')").toggleClass("select");
-        });
-
-        $(document).on("mouseleave",".dddown ul li", function()
-        {
-            $(this).toggleClass("highlight");
-            var text=$(this).html();
-            $(".row .rowelem:contains('" + text  + "')").parent().toggleClass("highlight");
-            $(".row .rowelem:contains('" + text  + "')").toggleClass("select");
-        });
-    });
-
-
-</script>
+		function equalRow(mytext)
+		{
+			var val=parseFloat(mytext);
+			if (!isNaN(val))
+			{			
+				$(".rowelem").each(function()
+				{
+					if ($(this).text()==val)
+					{
+						$(this).parent().toggleClass("freezehighlight");
+						$(this).toggleClass("select");
+					}
+				});
+			}
+			else
+			{
+				if (mytext.indexOf("null")>=0)
+				{
+				console.log("a" + mytext + "a");
+					$(".rowelem:contains(' ')").parent().toggleClass("freezehighlight");
+					$(".rowelem:contains(' ')").toggleClass("select");					
+				}
+				else
+				{		
+					$(".rowelem:contains('" + mytext  + "')").parent().toggleClass("freezehighlight");
+					$(".rowelem:contains('" + mytext  + "')").toggleClass("select");					
+				}
+			}
+		};
+		
+		function greaterThanRow(mytext, column)
+		{
+			var val=parseFloat(mytext);
+			if (!isNaN(val))
+			{		
+				for(i=0;i<=rows-1;i++)
+				{
+					var ix=column+ i*totElements;
+					var elem =$(".rowelem:eq(" + ix  + ")").html();				
+					
+					var elemNum=parseFloat(elem);			
+					if (elemNum>val)
+					{
+						$(".rowelem:eq(" + ix  + ")").parent().toggleClass("freezehighlight");
+						$(".rowelem:eq(" + ix  + ")").parent().children().toggleClass("select");
+					}				
+				}
+			}
+		};			
+		
+		function lessThanRow(mytext, column)
+		{
+			var val=parseFloat(mytext);
+			if (!isNaN(val))
+			{			
+				for(i=0;i<=rows-1;i++)
+				{
+					var ix=column+ i*totElements;
+					var elem =$(".row .rowelem:eq(" + ix  + ")").html();				
+					
+					var elemNum=parseFloat(elem);			
+					if (elemNum<val)
+					{
+						$(".rowelem:eq(" + ix  + ")").parent().toggleClass("freezehighlight");
+						$(".rowelem:eq(" + ix  + ")").parent().children().toggleClass("select");
+					}
+					
+				}
+			}
+		};			
+	</script>
 
   </head>
   <body>
-
-
-<div class="forward">Drop Down Colmuns</div>
+	  <table class="table table-hover">
+	  <thead>
+		<tr>
+			<th class="header">Header01</th>
+			<th class="header">Header02</th>
+			<th class="header">Header03</th>
+			<th class="header">Header04</th>
+			<th class="header">Header05</th>
+			<th class="header">Header06</th>
+		</tr>
+	  </thead>
+	  <tbody>
+		<tr>
+			<td class="rowelem">Test01</td>
+			<td class="rowelem">Test02</td>
+			<td class="rowelem">Test03</td>
+			<td class="rowelem">Test04</td>
+			<td class="rowelem">Test05</td>
+			<td class="rowelem">Test06</td>
+		</tr>
+		<tr>
+			<td class="rowelem"> </td>
+			<td class="rowelem">Test02</td>
+			<td class="rowelem">Test03</td>
+			<td class="rowelem">Test04</td>
+			<td class="rowelem">Test05</td>
+			<td class="rowelem">Test06</td>
+		</tr>
+		<tr>
+			<td class="rowelem"> </td>
+			<td class="rowelem">Test12</td>
+			<td class="rowelem">Test13</td>
+			<td class="rowelem">Test14</td>
+			<td class="rowelem">Test15</td>
+			<td class="rowelem">Test16</td>
+		</tr>
+		<tr>
+			<td class="rowelem">ATest21</td>
+			<td class="rowelem">ATest22</td>
+			<td class="rowelem">ATest23</td>
+			<td class="rowelem">ATest24</td>
+			<td class="rowelem">ATest25</td>
+			<td class="rowelem">ATest26</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test31</td>
+			<td class="rowelem">Test32</td>
+			<td class="rowelem">Test33</td>
+			<td class="rowelem">Test34</td>
+			<td class="rowelem">Test35</td>
+			<td class="rowelem">Test36</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test11</td>
+			<td class="rowelem">Test12</td>
+			<td class="rowelem">Test13</td>
+			<td class="rowelem">Test14</td>
+			<td class="rowelem">Test15</td>
+			<td class="rowelem">Test16</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test21</td>
+			<td class="rowelem">Test22</td>
+			<td class="rowelem">Test23</td>
+			<td class="rowelem">Test24</td>
+			<td class="rowelem">Test25</td>
+			<td class="rowelem">Test26</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test31</td>
+			<td class="rowelem">Test32</td>
+			<td class="rowelem">Test33</td>
+			<td class="rowelem">Test34</td>
+			<td class="rowelem">Test35</td>
+			<td class="rowelem">Test36</td>
+		</tr>    
+		<tr>
+			<td class="rowelem">-1.5</td>
+			<td class="rowelem">Test22</td>
+			<td class="rowelem">Test23</td>
+			<td class="rowelem">Test24</td>
+			<td class="rowelem">Test25</td>
+			<td class="rowelem">Test26</td>
+		</tr>
+		<tr>
+			<td class="rowelem">-50.888</td>
+			<td class="rowelem">Test32</td>
+			<td class="rowelem">Test33</td>
+			<td class="rowelem">Test34</td>
+			<td class="rowelem">Test35</td>
+			<td class="rowelem">Test36</td>
+		</tr>
+		<tr>
+			<td class="rowelem">-100.2</td>
+			<td class="rowelem">Test12</td>
+			<td class="rowelem">Test13</td>
+			<td class="rowelem">Test14</td>
+			<td class="rowelem">Test15</td>
+			<td class="rowelem">Test16</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test21</td>
+			<td class="rowelem">Test22</td>
+			<td class="rowelem">Test23</td>
+			<td class="rowelem">Test24</td>
+			<td class="rowelem">Test25</td>
+			<td class="rowelem">Test26</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test31</td>
+			<td class="rowelem">Test32</td>
+			<td class="rowelem">Test33</td>
+			<td class="rowelem">Test34</td>
+			<td class="rowelem">Test35</td>
+			<td class="rowelem">Test36</td>
+		</tr>        
+		<tr>
+			<td class="rowelem">Test21</td>
+			<td class="rowelem">Test22</td>
+			<td class="rowelem">Test23</td>
+			<td class="rowelem">Test24</td>
+			<td class="rowelem">Test25</td>
+			<td class="rowelem">Test26</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test31</td>
+			<td class="rowelem">Test32</td>
+			<td class="rowelem">Test33</td>
+			<td class="rowelem">Test34</td>
+			<td class="rowelem">Test35</td>
+			<td class="rowelem">Test36</td>
+		</tr>   
+		<tr>
+			<td class="rowelem">10</td>
+			<td class="rowelem">20</td>
+			<td class="rowelem">30</td>
+			<td class="rowelem">40</td>
+			<td class="rowelem">50</td>
+			<td class="rowelem">60</td>
+		</tr>       
+		<tr>
+			<td class="rowelem">1</td>
+			<td class="rowelem">2</td>
+			<td class="rowelem">3</td>
+			<td class="rowelem">4</td>
+			<td class="rowelem">5</td>
+			<td class="rowelem">6</td>
+		</tr>
+		<tr>
+			<td class="rowelem">11</td>
+			<td class="rowelem">12</td>
+			<td class="rowelem">13</td>
+			<td class="rowelem">14</td>
+			<td class="rowelem">15</td>
+			<td class="rowelem">-16</td>
+		</tr>
+		<tr>
+			<td class="rowelem">21</td>
+			<td class="rowelem">22</td>
+			<td class="rowelem">23</td>
+			<td class="rowelem">24</td>
+			<td class="rowelem">25</td>
+			<td class="rowelem">-26</td>
+		</tr>	
+		<tr>
+			<td class="rowelem">Test11</td>
+			<td class="rowelem">Test12</td>
+			<td class="rowelem">Test13</td>
+			<td class="rowelem">Test14</td>
+			<td class="rowelem">Test15</td>
+			<td class="rowelem">Test16</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test21</td>
+			<td class="rowelem">Test22</td>
+			<td class="rowelem">Test23</td>
+			<td class="rowelem">Test24</td>
+			<td class="rowelem">Test25</td>
+			<td class="rowelem">Test26</td>
+		</tr>
+		<tr>
+			<td class="rowelem">Test31</td>
+			<td class="rowelem">Test32</td>
+			<td class="rowelem">Test33</td>
+			<td class="rowelem">Test34</td>
+			<td class="rowelem">Test35</td>
+			<td class="rowelem">Test36</td>
+		</tr>    	
+	  </tbody>
+	</table>
 <br/>
-<div class="container">
-    <div class="row">
-        <div class="header col-sm-2">Header01</div>
-        <div class="header col-sm-2">Header02</div>
-        <div class="header col-sm-2">Header03</div>
-        <div class="header col-sm-2">Header04</div>
-        <div class="header col-sm-2">Header05</div>
-        <div class="header col-sm-2">Header06</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test01</div>
-        <div class="rowelem col-sm-2">Test02</div>
-        <div class="rowelem col-sm-2">Test03</div>
-        <div class="rowelem col-sm-2">Test04</div>
-        <div class="rowelem col-sm-2">Test05</div>
-        <div class="rowelem col-sm-2">Test06</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test01</div>
-        <div class="rowelem col-sm-2">Test02</div>
-        <div class="rowelem col-sm-2">Test03</div>
-        <div class="rowelem col-sm-2">Test04</div>
-        <div class="rowelem col-sm-2">Test05</div>
-        <div class="rowelem col-sm-2">Test06</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test11</div>
-        <div class="rowelem col-sm-2">Test12</div>
-        <div class="rowelem col-sm-2">Test13</div>
-        <div class="rowelem col-sm-2">Test14</div>
-        <div class="rowelem col-sm-2">Test15</div>
-        <div class="rowelem col-sm-2">Test16</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test21</div>
-        <div class="rowelem col-sm-2">Test22</div>
-        <div class="rowelem col-sm-2">Test23</div>
-        <div class="rowelem col-sm-2">Test24</div>
-        <div class="rowelem col-sm-2">Test25</div>
-        <div class="rowelem col-sm-2">Test26</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test31</div>
-        <div class="rowelem col-sm-2">Test32</div>
-        <div class="rowelem col-sm-2">Test33</div>
-        <div class="rowelem col-sm-2">Test34</div>
-        <div class="rowelem col-sm-2">Test35</div>
-        <div class="rowelem col-sm-2">Test36</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test11</div>
-        <div class="rowelem col-sm-2">Test12</div>
-        <div class="rowelem col-sm-2">Test13</div>
-        <div class="rowelem col-sm-2">Test14</div>
-        <div class="rowelem col-sm-2">Test15</div>
-        <div class="rowelem col-sm-2">Test16</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test21</div>
-        <div class="rowelem col-sm-2">Test22</div>
-        <div class="rowelem col-sm-2">Test23</div>
-        <div class="rowelem col-sm-2">Test24</div>
-        <div class="rowelem col-sm-2">Test25</div>
-        <div class="rowelem col-sm-2">Test26</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test31</div>
-        <div class="rowelem col-sm-2">Test32</div>
-        <div class="rowelem col-sm-2">Test33</div>
-        <div class="rowelem col-sm-2">Test34</div>
-        <div class="rowelem col-sm-2">Test35</div>
-        <div class="rowelem col-sm-2">Test36</div>
-    </div>    
-    <div class="row">
-        <div class="rowelem col-sm-2">Test21</div>
-        <div class="rowelem col-sm-2">Test22</div>
-        <div class="rowelem col-sm-2">Test23</div>
-        <div class="rowelem col-sm-2">Test24</div>
-        <div class="rowelem col-sm-2">Test25</div>
-        <div class="rowelem col-sm-2">Test26</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test31</div>
-        <div class="rowelem col-sm-2">Test32</div>
-        <div class="rowelem col-sm-2">Test33</div>
-        <div class="rowelem col-sm-2">Test34</div>
-        <div class="rowelem col-sm-2">Test35</div>
-        <div class="rowelem col-sm-2">Test36</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test11</div>
-        <div class="rowelem col-sm-2">Test12</div>
-        <div class="rowelem col-sm-2">Test13</div>
-        <div class="rowelem col-sm-2">Test14</div>
-        <div class="rowelem col-sm-2">Test15</div>
-        <div class="rowelem col-sm-2">Test16</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test21</div>
-        <div class="rowelem col-sm-2">Test22</div>
-        <div class="rowelem col-sm-2">Test23</div>
-        <div class="rowelem col-sm-2">Test24</div>
-        <div class="rowelem col-sm-2">Test25</div>
-        <div class="rowelem col-sm-2">Test26</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test31</div>
-        <div class="rowelem col-sm-2">Test32</div>
-        <div class="rowelem col-sm-2">Test33</div>
-        <div class="rowelem col-sm-2">Test34</div>
-        <div class="rowelem col-sm-2">Test35</div>
-        <div class="rowelem col-sm-2">Test36</div>
-    </div>        
-    <div class="row">
-        <div class="rowelem col-sm-2">Test21</div>
-        <div class="rowelem col-sm-2">Test22</div>
-        <div class="rowelem col-sm-2">Test23</div>
-        <div class="rowelem col-sm-2">Test24</div>
-        <div class="rowelem col-sm-2">Test25</div>
-        <div class="rowelem col-sm-2">Test26</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test31</div>
-        <div class="rowelem col-sm-2">Test32</div>
-        <div class="rowelem col-sm-2">Test33</div>
-        <div class="rowelem col-sm-2">Test34</div>
-        <div class="rowelem col-sm-2">Test35</div>
-        <div class="rowelem col-sm-2">Test36</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test11</div>
-        <div class="rowelem col-sm-2">Test12</div>
-        <div class="rowelem col-sm-2">Test13</div>
-        <div class="rowelem col-sm-2">Test14</div>
-        <div class="rowelem col-sm-2">Test15</div>
-        <div class="rowelem col-sm-2">Test16</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test21</div>
-        <div class="rowelem col-sm-2">Test22</div>
-        <div class="rowelem col-sm-2">Test23</div>
-        <div class="rowelem col-sm-2">Test24</div>
-        <div class="rowelem col-sm-2">Test25</div>
-        <div class="rowelem col-sm-2">Test26</div>
-    </div>
-    <div class="row">
-        <div class="rowelem col-sm-2">Test31</div>
-        <div class="rowelem col-sm-2">Test32</div>
-        <div class="rowelem col-sm-2">Test33</div>
-        <div class="rowelem col-sm-2">Test34</div>
-        <div class="rowelem col-sm-2">Test35</div>
-        <div class="rowelem col-sm-2">Test36</div>
-    </div>       
-</div>
-
-
+<br/>
+<button type="button" class="btn btn-light" id="reset" >Reset</button>
   </body>
 </html>
